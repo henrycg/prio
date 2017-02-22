@@ -1,3 +1,18 @@
+=============================================================================
+=                         !!!!! WARNING !!!!!                               =
+=    This is NOT production-ready bullet-proof software, and is full of     =
+= security vulnerabilities (timing channels, hard-coded secret keys, etc.). =
+=   that make it totally unsuitable for use in a production environment.    =
+=============================================================================
+
+This is the software prototype that accompanies the research paper:
+
+    "Prio: Private, Robust, and Scalable Computation of Aggregate Statistics"
+      by Henry Corrigan-Gibbs and Dan Boneh
+      NSDI 2017
+
+For more information and a link to the paper, please visit:
+  https://crypto.stanford.edu/prio/
 
 Dependencies (for fast polynomial operations):
 * FLINT 2.5.2

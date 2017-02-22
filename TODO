@@ -1,0 +1,4 @@
+* Really randomize the Valid() circuit ops
+* Make "Go -> C -> Go" translation use regular binary strings
+  (instead of hex-encoded strings) in poly code
+

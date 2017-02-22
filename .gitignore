@@ -22,3 +22,9 @@ _testmain.go
 *.exe
 *.test
 *.prof
+.*.swp
+
+# Mac OS junk
+.DS_Store
+tclient/tclient
+tserver/tserver

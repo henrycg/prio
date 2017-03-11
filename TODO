@@ -1,3 +1,5 @@
+* Require that the random point r be > M.
+* Randomize f(0), g(0), h(0).
 * Really randomize the Valid() circuit ops
 * Make "Go -> C -> Go" translation use regular binary strings
   (instead of hex-encoded strings) in poly code

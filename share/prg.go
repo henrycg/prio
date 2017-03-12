@@ -101,6 +101,19 @@ func (g *GenPRG) Share(mod *big.Int, value *big.Int) []*big.Int {
 	return out
 }
 
+// Split a random value into shares using modulus mod.
+func (g *GenPRG) ShareRand(mod *big.Int) *big.Int {
+	val := new(big.Int)
+	for i := 0; i < g.nServers; i++ {
+		val.Add(val, g.rand[i].RandInt(mod))
+	}
+	val.Mod(val, mod)
+
+	g.delta = append(g.delta, utils.Zero)
+
+	return val
+}
+
 // Generate the hints that serverIdx can use to recover the shares.
 func (g *GenPRG) Hints(serverIdx int) *PRGHints {
 	out := new(PRGHints)

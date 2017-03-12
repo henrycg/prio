@@ -23,9 +23,11 @@ type ClientRequest struct {
 
 func sharePolynomials(ckt *circuit.Circuit, prg *share.GenPRG) {
 	mulGates := ckt.MulGates()
+	mod := ckt.Modulus()
 
-	// Little n is the number of multiplication gates in ckt
-	n := len(mulGates)
+	// Little n the number of points on the polynomials.
+	// The constant term is randomized, so it's (mulGates + 1).
+	n := len(mulGates) + 1
 	log.Printf("Mulgates: %v", n)
 
 	// Big N is n rounded up to a power of two
@@ -40,9 +42,18 @@ func sharePolynomials(ckt *circuit.Circuit, prg *share.GenPRG) {
 	}
 
 	// Compute f(x) and g(x)
-	for i := 0; i < n; i++ {
-		pointsF[i] = mulGates[i].ParentL.WireValue
-		pointsG[i] = mulGates[i].ParentR.WireValue
+	pointsF[0] = prg.ShareRand(mod)
+	pointsG[0] = prg.ShareRand(mod)
+
+	// Send a sharing of h(0) = f(0)*g(0).
+	h0 := new(big.Int)
+	h0.Mul(pointsF[0], pointsG[0])
+	h0.Mod(h0, mod)
+	prg.Share(mod, h0)
+
+	for i := 1; i < n; i++ {
+		pointsF[i] = mulGates[i-1].ParentL.WireValue
+		pointsG[i] = mulGates[i-1].ParentR.WireValue
 	}
 
 	// Zero pad the upper coefficients of f(x) and g(x)
@@ -68,8 +79,8 @@ func sharePolynomials(ckt *circuit.Circuit, prg *share.GenPRG) {
 	hint := new(big.Int)
 	for i := 1; i < 2*N-1; i += 2 {
 		hint.Mul(evalsF[i], evalsG[i])
-		hint.Mod(hint, ckt.Modulus())
-		prg.Share(ckt.Modulus(), hint)
+		hint.Mod(hint, mod)
+		prg.Share(mod, hint)
 	}
 }
 

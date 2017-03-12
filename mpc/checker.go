@@ -42,7 +42,10 @@ func NewCheckerPrecomp(cfg *config.Config) *CheckerPrecomp {
 	ckt := configToCircuit(cfg)
 	pre := new(CheckerPrecomp)
 
-	n := len(ckt.MulGates())
+	// This is the number of fixed points on f and g. It's
+	// the number of multiplication gates plus one for the
+	// constant term.
+	n := len(ckt.MulGates()) + 1
 	N := utils.NextPowerOfTwo(n)
 
 	rootsN := share.GetRoots(N)
@@ -70,7 +73,7 @@ type Checker struct {
 	mod *big.Int
 	ckt *circuit.Circuit
 
-	n int // Number of mul gates in circuit
+	n int // Number of fixed points on f and g (mulGates + 1)
 	N int // n rounded up to a power of two
 
 	pointsF []*big.Int
@@ -89,7 +92,7 @@ func NewChecker(cfg *config.Config, serverIdx int, leaderIdx int) *Checker {
 	c.ckt = configToCircuit(cfg)
 	c.mod = c.ckt.Modulus()
 
-	c.n = len(c.ckt.MulGates())
+	c.n = len(c.ckt.MulGates()) + 1
 	c.N = utils.NextPowerOfTwo(c.n)
 
 	c.pointsF = make([]*big.Int, c.N)
@@ -124,13 +127,18 @@ func (c *Checker) SetReq(req *ClientRequest) {
 func (c *Checker) evalPoly(pre *CheckerPrecomp) {
 	mulGates := c.ckt.MulGates()
 
+	// Recover constant terms of the polynomials f, g, and h.
+	c.pointsF[0] = c.prg.Get(c.mod)
+	c.pointsG[0] = c.prg.Get(c.mod)
+	c.pointsH[0] = c.prg.Get(c.mod)
+
 	// For all multiplication triples a_i * b_i = c_i,
 	//    polynomial [f(x)] has [f(i)] = [a_i]
 	//    polynomial [g(x)] has [g(i)] = [b_i]
-	for i := 0; i < c.n; i++ {
-		c.pointsF[i] = mulGates[i].ParentL.WireValue
-		c.pointsG[i] = mulGates[i].ParentR.WireValue
-		c.pointsH[2*i] = mulGates[i].WireValue
+	for i := 1; i < c.n; i++ {
+		c.pointsF[i] = mulGates[i-1].ParentL.WireValue
+		c.pointsG[i] = mulGates[i-1].ParentR.WireValue
+		c.pointsH[2*i] = mulGates[i-1].WireValue
 	}
 
 	// Pad the high-order coefficients with zeros

@@ -154,7 +154,12 @@ func (c *Checker) evalPoly(pre *CheckerPrecomp) {
 
 	c.evalF.Set(pre.xN.Eval(c.pointsF))
 	c.evalG.Set(pre.xN.Eval(c.pointsG))
+	c.evalG.Mul(c.evalG, pre.x)
+	c.evalG.Mod(c.evalG, c.mod)
+
 	c.evalH.Set(pre.x2N.Eval(c.pointsH))
+	c.evalH.Mul(c.evalH, pre.x)
+	c.evalH.Mod(c.evalH, c.mod)
 }
 
 func (c *Checker) CorShare(out *CorShare, pre *CheckerPrecomp) {
